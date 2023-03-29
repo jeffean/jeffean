@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Combination Generator</title>
+  </head>
+  <body>
+    <h1>Combination Generator</h1>
+
+    <h2>Men Group</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Number</th>
+        </tr>
+      </thead>
+      <tbody id="men-group">
+      </tbody>
+    </table>
+
+    <h2>Women Group</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Number</th>
+        </tr>
+      </thead>
+      <tbody id="women-group">
+      </tbody>
+    </table>
+
+    <h2>Generate Combinations</h2>
+    <label for="men-select">Select a man:</label>
+    <select id="men-select">
+    </select>
+
+    <label for="women-select">Select a woman:</label>
+    <select id="women-select">
+    </select>
+
+    <button id="generate-button">Generate</button>
+
+    <h2>Selected Combination</h2>
+    <p id="selected-combination"></p>
+
+    <h2>Results</h2>
+    <h3>All possible combinations larger than the selected combination:</h3>
+    <ul id="larger-list">
+    </ul>
+
+    <h3>All possible combinations smaller than the selected combination:</h3>
+    <ul id="smaller-list">
+    </ul>
+
+    <h2>Select two combinations to add:</h2>
+    <ul id="selected-list">
+    </ul>
+    <button id="calculate-button">Calculate</button>
+
+    <script>
+      // Define the men and women groups
+const menGroup = {
+    'Sam Li': 5.6,
+    'Chuo-Yun Yang': 5.99,
+    'Clark Wey': 5.01,
+    'Jeff Tsai': 3.23,
+    'Andrei Elovikov': 4.49
+}
+
+const womenGroup = {
+    'Kristine Tan': 3.69,
+    'Meng-Lun Tsai': 4.7,
+    'Yi Tian': 3.5,
+    'Christine Yeh': 3.71,
+    'Yemia Hashimoto': 3.1
+}
+
+      // Populate the men and women groups tables
+      const menTable = document.getElementById("men-group");
+      const womenTable = document.getElementById("women-group");
+      for (const [name, number] of Object.entries(menGroup)) {
+        const row = menTable.insertRow();
+        row.insertCell().textContent = name;
+        row.insertCell().textContent = number;
+      }
+      for (const [name, number] of Object.entries(womenGroup)) {
+        const row = womenTable.insertRow();
+        row.insertCell().textContent = name;
+        row.insertCell().textContent = number;
+      }
+
+      // Populate the dropdown menus with the names from men and women groups
+      const menSelect = document.getElementById("men-select");
+      const womenSelect = document.getElementById("women-select");
+      for (const name of Object.keys(menGroup)) {
+        const option = document.createElement("option");
+        option.value = name;
+        option.text = name;
+        menSelect.add(option);
+      }
+      for (const name of Object.keys(womenGroup)) {
+        const option = document.createElement("option");
+        option.value = name;
+        option.text = name;
+        womenSelect.add(option);
+      }
+
+      // Add a click event listener to the Generate button
+      const generateButton = document.getElementById("generate-button");
+      generateButton.addEventListener("click", generateCom);
+
+      // Add a click event listener to the Calculate button
+      const calculateButton = document.getElementById("calculate-button");
+      calculateButton.addEventListener("click", calculateSelected);
+
+      // Function to generate the combinations
+      function generateCom() {
+        // Get the selected man and woman
+        const menName = menSelect.value;
+        const menNumber = menGroup[menName];
+        const womenName = womenSelect.value;
+        const womenNumber = womenGroup[womenName];
+        const inputCombine = menNumber + womenNumber;
+        const selectedCombination = `${menName}(${menNumber}) + ${womenName}(${womenNumber})`;
+        const selectedValue = menNumber + womenNumber;
+        const selectedCombinationParagraph = document.getElementById("selected-combination");
+        selectedCombinationParagraph.textContent = `${selectedCombination} - ${selectedValue}`;
+
+        // Clear the results lists
+        const largerList = document.getElementById("larger-list");
+        const smallerList = document.getElementById("smaller-list");
+        largerList.innerHTML = "";
+        smallerList.innerHTML = "";
+
+        // Create a list of all possible combinations larger than the selected combination
+        const largerCombinations = [];
+        for (const [menName, menNumber] of Object.entries(menGroup)) {
+          for (const [womenName, womenNumber] of Object.entries(womenGroup)) {
+            if (menNumber + womenNumber > inputCombine && menName !== menSelect.value && womenName !== womenSelect.value) {
+              const combination = `${menName}(${menNumber}) + ${womenName}(${womenNumber})`;
+              const result = menNumber + womenNumber;
+              largerCombinations.push([combination, result]);
+            }
+          }
+        }
+
+        // Create a list of all possible combinations smaller than the selected combination
+        const smallerCombinations = [];
+        for (const [menName, menNumber] of Object.entries(menGroup)) {
+          for (const [womenName, womenNumber] of Object.entries(womenGroup)) {
+            if (menNumber + womenNumber < inputCombine && menName !== menSelect.value && womenName !== womenSelect.value) {
+              const combination = `${menName}(${menNumber}) + ${womenName}(${womenNumber})`;
+              const result = menNumber + womenNumber;
+              smallerCombinations.push([combination, result]);
+            }
+          }
+        }
+
+        // Sort the larger and smaller combinations lists
+        largerCombinations.sort((a, b) => b[1] - a[1]);
+        smallerCombinations.sort((a, b) => a[1] - b[1]);
+
+        // Display the larger combinations list
+        const largerListElement = document.getElementById("larger-list");
+        largerListElement.innerHTML = "";
+        for (const [combination, result] of largerCombinations) {
+          const listItem = document.createElement("li");
+          const label = document.createElement("label");
+          const checkbox = document.createElement("input");
+          checkbox.type = "checkbox";
+          label.appendChild(checkbox);
+          label.appendChild(document.createTextNode(`${combination} - ${result}`));
+          listItem.appendChild(label);
+          largerListElement.appendChild(listItem);
+        }
+
+        // Display the smaller combinations list
+        const smallerListElement = document.getElementById("smaller-list");
+        smallerListElement.innerHTML = "";
+        for (const [combination, result] of smallerCombinations) {
+          const listItem = document.createElement("li");
+          const label = document.createElement("label");
+          const checkbox = document.createElement("input");
+          checkbox.type = "checkbox";
+          label.appendChild(checkbox);
+          label.appendChild(document.createTextNode(`${combination} - ${result}`));
+          listItem.appendChild(label);
+          smallerListElement.appendChild(listItem);
+        }
+      }
+
+      // Function to
+      function calculateSelected() {
+        // Get the selected man and woman
+        const menName = menSelect.value;
+        const menNumber = menGroup[menName];
+        const womenName = womenSelect.value;
+        const womenNumber = womenGroup[womenName];
+        const inputCombine = menNumber + womenNumber;
+
+        // Get the selected larger and smaller combinations
+        const selectedCombinations = document.querySelectorAll('input[type="checkbox"]:checked');
+        const largerValues = [];
+        const smallerValues = [];
+        for (const checkbox of selectedCombinations) {
+          const text = checkbox.parentElement.textContent;
+          const [combination, result] = text.split(" - ");
+          const value = Number(result);
+          if (value > inputCombine) {
+            largerValues.push(value);
+          } else if (value < inputCombine) {
+            smallerValues.push(value);
+          }
+        }
+
+        // Calculate the result
+        const largerText = largerValues.join(", ");
+        const smallerText = smallerValues.join(", ");
+        const selectedListElement = document.getElementById("selected-list");
+        selectedListElement.textContent = `Selected combinations: ${largerText}, ${inputCombine}, ${smallerText}`;
+        const total = largerValues.reduce((a, b) => a + b, 0) + inputCombine + smallerValues.reduce((a, b) => a + b, 0);
+        const resultElement = document.createElement("p");
+        resultElement.textContent = `Total: ${total}`;
+        selectedListElement.appendChild(resultElement);
+      }
+    </script>
+  </body>
+</html>
